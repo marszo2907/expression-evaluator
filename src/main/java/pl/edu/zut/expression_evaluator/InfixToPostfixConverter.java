@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class InfixToPostfixConverter {
-    private static final String ILLEGAL_ARGUMENT_MSG = "Exprssion contains an unsupported symbol: %s";
+    private static final String ILLEGAL_ARGUMENT_MSG = "Exprssion contains an unsupported symbo or a combination of symbols: %s";
     private static final Pattern NUMBER_REGEX = Pattern.compile("^[0-9.+-]$");
     private static final Pattern OPERATOR_REGEX;
 
@@ -57,7 +57,8 @@ public class InfixToPostfixConverter {
                 isInNumber = true;
                 numberBuilder.append(symbol);
             } else {
-                throw new IllegalArgumentException(String.format(ILLEGAL_ARGUMENT_MSG, symbol));
+                String illegalSequence = (null == previousSymbol ? "" : previousSymbol) + symbol;
+                throw new IllegalArgumentException(String.format(ILLEGAL_ARGUMENT_MSG, illegalSequence));
             }
             previousSymbol = symbol;
         }
