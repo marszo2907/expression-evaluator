@@ -22,6 +22,10 @@ public enum Operator {
         return sign;
     }
 
+    public int getPrecedence() {
+        return precedence;
+    }
+
     private Operator(String sign, int precedence) {
         this.sign = sign;
         this.precedence = precedence;
