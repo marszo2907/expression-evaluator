@@ -1,13 +1,17 @@
 package pl.edu.zut.expression_evaluator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class InfixToPostfixConverter {
-    private static final String NUMBER_REGEX = "[0-9.+-]";
-    private static String OPERATOR_REGEX;
+    private static final String ILLEGAL_ARGUMENT_MSG = "Exprssion contains an unsupported symbol: %s";
+    private static final Pattern NUMBER_REGEX = Pattern.compile("^[0-9.+-]$");
+    private static final Pattern OPERATOR_REGEX;
+
+    private static InfixToPostfixConverter instance;
 
     static {
         StringBuilder operatorRegexBuilder = new StringBuilder();
@@ -16,10 +20,8 @@ public class InfixToPostfixConverter {
             operatorRegexBuilder.append(operator.getSign());
         }
         operatorRegexBuilder.append("]$");
-        OPERATOR_REGEX = operatorRegexBuilder.toString();
+        OPERATOR_REGEX = Pattern.compile(operatorRegexBuilder.toString());
     }
-
-    private static InfixToPostfixConverter instance;
 
     public static InfixToPostfixConverter getInstance() {
         if (null == instance) {
@@ -29,19 +31,18 @@ public class InfixToPostfixConverter {
     }
 
     public List<String> getPostfixTokens(String infixExpression) {
+        boolean isInNumber = false;
         StringBuilder numberBuilder = new StringBuilder();
-        List<String> postfixTokens = new ArrayList<>();
         Deque<Operator> operatorStack = new ArrayDeque<>();
+        List<String> postfixTokens = new ArrayList<>();
         String previousSymbol = null;
 
-        boolean isInNumber = false;
-
         for (var symbol : infixExpression.replaceAll("\\s", "").split("")) {
-            if (symbol.matches(OPERATOR_REGEX) && !(null == previousSymbol || previousSymbol.matches(OPERATOR_REGEX))) {
+            if (OPERATOR_REGEX.matcher(symbol).find() && !(null == previousSymbol || OPERATOR_REGEX.matcher(previousSymbol).find())) {
                 if (isInNumber) {
                     isInNumber = false;
                     postfixTokens.add(numberBuilder.toString());
-                    numberBuilder = new StringBuilder();
+                    numberBuilder.setLength(0);
                 }
                 Operator operator = Operator.valueOfSign(symbol);
                 if (operatorStack.isEmpty() || operator.getPrecedence() > operatorStack.peekLast().getPrecedence()) {
@@ -52,15 +53,14 @@ public class InfixToPostfixConverter {
                     }
                     operatorStack.offerLast(operator);
                 }
-            } else if (symbol.matches(NUMBER_REGEX)) {
+            } else if (NUMBER_REGEX.matcher(symbol).find()) {
                 isInNumber = true;
                 numberBuilder.append(symbol);
             } else {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(String.format(ILLEGAL_ARGUMENT_MSG, symbol));
             }
             previousSymbol = symbol;
         }
-
         if (isInNumber) {
             postfixTokens.add(numberBuilder.toString());
         }
@@ -70,4 +70,6 @@ public class InfixToPostfixConverter {
 
         return postfixTokens;
     }
+
+    private InfixToPostfixConverter() {}
 }
