@@ -1,13 +1,15 @@
 package pl.edu.zut.expression_evaluator;
 
 public enum Operator {
-    MULTIPLY("*", 1),
-    DIVIDE("/", 1),
-    ADD("+", 0),
-    SUBTRACT("-", 0);
+    MULTIPLY(1, "*"),
+    DIVIDE(1, "/"),
+    ADD(0, "+"),
+    SUBTRACT(0, "-");
 
-    private final String sign;
+    private static final String OPERATOR_NOT_SUPPORTED_MSG = "Operator %s is not supported.";
+
     private final int precedence;
+    private final String sign;
 
     public static Operator valueOfSign(String sign) {
         for (var operator : Operator.values()) {
@@ -15,15 +17,19 @@ public enum Operator {
                 return operator;
             }
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(String.format(OPERATOR_NOT_SUPPORTED_MSG, sign));
+    }
+
+    public int getPrecedence() {
+        return precedence;
     }
 
     public String getSign() {
         return sign;
     }
 
-    private Operator(String sign, int precedence) {
-        this.sign = sign;
+    private Operator(int precedence, String sign) {
         this.precedence = precedence;
+        this.sign = sign;
     }
 }
