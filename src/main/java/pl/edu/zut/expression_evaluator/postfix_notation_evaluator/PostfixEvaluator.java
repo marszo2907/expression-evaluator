@@ -1,6 +1,8 @@
 package pl.edu.zut.expression_evaluator.postfix_notation_evaluator;
 
 import static java.math.RoundingMode.HALF_UP;
+import static java.math.MathContext.DECIMAL128;
+import static java.math.MathContext.DECIMAL32;
 import static pl.edu.zut.expression_evaluator.Operator.*;
 
 import pl.edu.zut.expression_evaluator.Operator;
@@ -52,28 +54,18 @@ public class PostfixEvaluator {
             throw new IllegalArgumentException(ILLEGAL_ARGUMENT_MESSAGE);
         }
 
-        return operandStack.remove();
+        return operandStack.remove().round(DECIMAL32);
     }
 
     private PostfixEvaluator() {}
 
     private BigDecimal performCalculation(BigDecimal leftOperand, BigDecimal rightOperand, Operator operator) {
-        BigDecimal value;
-
-        switch (operator) {
-            case MULTIPLY -> value = leftOperand.multiply(rightOperand);
-            case DIVIDE -> {
-                try {
-                    value = leftOperand.divide(rightOperand);
-                } catch (ArithmeticException e) {
-                    value = leftOperand.divide(rightOperand, 10, HALF_UP);
-                }
-            }
-            case ADD -> value = leftOperand.add(rightOperand);
-            case SUBTRACT -> value = leftOperand.subtract(rightOperand);
+        return switch (operator) {
+            case MULTIPLY -> leftOperand.multiply(rightOperand, DECIMAL128);
+            case DIVIDE -> leftOperand.divide(rightOperand, DECIMAL128);
+            case ADD -> leftOperand.add(rightOperand, DECIMAL128);
+            case SUBTRACT -> leftOperand.subtract(rightOperand, DECIMAL128);
             default -> throw new UnsupportedOperationException(String.format(UNSUPPORTED_OPERATION_MESSAGE, operator.getSign()));
         };
-
-        return value;
     }
 }

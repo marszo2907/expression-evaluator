@@ -23,9 +23,7 @@ public class PostfixEvaluatorTest {
     @MethodSource("validTokensProvider")
     public void testValid(List<String> tokens, String expectedResultStr) {
         BigDecimal expectedResult = new BigDecimal(expectedResultStr);
-
         BigDecimal result = postfixEvaluator.evaluate(tokens);
-
         assertEquals(expectedResult, result);
     }
 
@@ -81,11 +79,11 @@ public class PostfixEvaluatorTest {
             ),
             Arguments.of(
                 List.of("1", "3", "/"),
-                "0.3333333333"
+                "0.3333333"
             ),
             Arguments.of(
                 List.of("2", "1", "3", "/", "*"),
-                "0.6666666666"
+                "0.6666667"
             )
         );
     }

@@ -44,16 +44,17 @@ public class ExpressionEvaluatorTest {
         "-1 / -2, 0.5",
         "-1/-2, 0.5",
         "-1/ -2, 0.5",
-        "1 / 3, 0.3333333333",
-        "1/3, 0.3333333333",
-        "1 /3, 0.3333333333",
-        "2 * 1 / 3, 0.6666666667",
-        "2*1/3, 0.6666666667",
-        "2* 1 /3, 0.6666666667",
+        "1 / 3, 0.3333333",
+        "1/3, 0.3333333",
+        "1 /3, 0.3333333",
+        "2 * 1 / 3, 0.6666667",
+        "2*1/3, 0.6666667",
+        "2* 1 /3, 0.6666667",
     })
     public void testValid(String infixExpression, String expectedResultStr) {
         BigDecimal expectedResult = new BigDecimal(expectedResultStr);
-        assertEquals(expectedResult, expressionEvaluator.evaluate(infixExpression));
+        BigDecimal result = expressionEvaluator.evaluate(infixExpression);
+        assertEquals(expectedResult, result);
     }
 
     @ParameterizedTest
@@ -83,5 +84,22 @@ public class ExpressionEvaluatorTest {
     })
     void testDivisionByZero(String infixExpression) {
         assertThrows(ArithmeticException.class, () -> expressionEvaluator.evaluate(infixExpression));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0 + 2.5 * (10 - 13.101), -7.7525",
+        "0+2.5*(10-13.101), -7.7525",
+        "(-2 * 3.25) / -1.234, 5.267423",
+        "(-2*3.25)/-1.234, 5.267423",
+        "(0 + 2.5) * (10 - 13.101), -7.7525",
+        "(0+2.5)*(10-13.101), -7.7525",
+        "(0 + 2.5) * (3 / (10 - 13.101)), -2.418575",
+        "(0+2.5)*(3/(10-13.101)), -2.418575",
+    })
+    void testValidWithParentheses(String infixExpression, String expectedResultStr) {
+        BigDecimal expectedResult = new BigDecimal(expectedResultStr);
+        BigDecimal result = expressionEvaluator.evaluate(infixExpression);
+        assertEquals(expectedResult, result);
     }
 }
