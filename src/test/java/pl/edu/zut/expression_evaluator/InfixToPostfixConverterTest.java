@@ -45,6 +45,28 @@ public class InfixToPostfixConverterTest {
         assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
     }
 
+    @ParameterizedTest
+    @MethodSource("validExpressionsWithParenthesesProvider")
+    void testValidWithParentheses(String infixExpression, List<String> expectedResult) {
+        List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
+        assertIterableEquals(expectedResult, postfixTokens);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0 + 2.5 * (10 - 13.101))",
+        "0 + 2.5 * )(10 - 13.101)",
+        "0 + 2.5 * ((10 - 13.101)",
+        "0 + 2.5 * (10 - 13.101)(",
+        "(-2 * 3.25) / -1.234)",
+        "(-2 * 3.25)) / -1.234",
+        ")(-2 * 3.25) / -1.234",
+        "0 + 2.5 (10 - 13.101)",
+    })
+    void testInvalidParentheses(String infixExpression) {
+        assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
+    }
+
     private static Stream<Arguments> validExpressionsProvider() {
         return Stream.of(
             Arguments.of(
@@ -70,6 +92,51 @@ public class InfixToPostfixConverterTest {
             Arguments.of(
                 "-2 *3.25/- 1.234",
                 List.of("-2", "3.25", "*", "-1.234", "/")
+            )
+        );
+    }
+
+    private static Stream<Arguments> validExpressionsWithParenthesesProvider() {
+        return Stream.of(
+            Arguments.of(
+                "0 + 2.5 * (10 - 13.101)",
+                List.of("0", "2.5", "10", "13.101", "-" , "*", "+")
+            ),
+            Arguments.of(
+                "0+2.5*(10-13.101)",
+                List.of("0", "2.5", "10", "13.101", "-" , "*", "+")
+            ),
+            Arguments.of(
+                "(-2 * 3.25) / -1.234",
+                List.of("-2", "3.25", "*", "-1.234", "/")
+            ),
+            Arguments.of(
+                "(-2*3.25)/-1.234",
+                List.of("-2", "3.25", "*", "-1.234", "/")
+            ),
+            Arguments.of(
+                "(0 + 2.5) * (10 - 13.101)",
+                List.of("0", "2.5", "+", "10", "13.101", "-" , "*")
+            ),
+            Arguments.of(
+                "(0+2.5)*(10-13.101)",
+                List.of("0", "2.5", "+", "10", "13.101", "-" , "*")
+            ),
+            Arguments.of(
+                "((0 + 2.5) * (10 - 13.101))",
+                List.of("0", "2.5", "+", "10", "13.101", "-" , "*")
+            ),
+            Arguments.of(
+                "((0+2.5)*(10-13.101))",
+                List.of("0", "2.5", "+", "10", "13.101", "-" , "*")
+            ),
+            Arguments.of(
+                "(0 + 2.5) * (3 / (10 - 13.101))",
+                List.of("0", "2.5", "+", "3", "10", "13.101", "-" , "/", "*")
+            ),
+            Arguments.of(
+                "(0+2.5)*(3/(10-13.101))",
+                List.of("0", "2.5", "+", "3", "10", "13.101", "-" , "/", "*")
             )
         );
     }

@@ -1,6 +1,8 @@
 package pl.edu.zut.expression_evaluator;
 
 public enum Operator {
+    LEFT_PARENTHESIS(Integer.MAX_VALUE, "("),
+    RIGHT_PARENTHESIS(Integer.MAX_VALUE, ")"),
     MULTIPLY(1, "*"),
     DIVIDE(1, "/"),
     ADD(0, "+"),
