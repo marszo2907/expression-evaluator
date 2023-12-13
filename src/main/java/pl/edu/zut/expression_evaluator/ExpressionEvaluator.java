@@ -19,7 +19,7 @@ public class ExpressionEvaluator {
 
     public BigDecimal evaluate(String infixExpression) {
         List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
-        return postfixEvaluator.evaluate(postfixTokens);
+        return postfixEvaluator.evaluate(postfixTokens).stripTrailingZeros();
     }
 
     private ExpressionEvaluator() {
