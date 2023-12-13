@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.ParameterizedTest;
-import pl.edu.zut.expression_evaluator.postfix_notation_evaluator.PostfixEvaluator;
 
 public class PostfixEvaluatorTest {
     private static PostfixEvaluator postfixEvaluator;

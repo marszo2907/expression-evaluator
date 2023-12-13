@@ -13,11 +13,20 @@ import java.util.regex.Pattern;
 
 public class PostfixEvaluator {
     private static final String ILLEGAL_ARGUMENT_MESSAGE = "Exprssion contains too many operands.";
+    private static final Pattern OPERATOR_REGEX;
     private static final String UNSUPPORTED_OPERATION_MESSAGE = "%s is not supported.";
 
     private static PostfixEvaluator instance;
 
-    private final String operatorRegex;
+    static {
+        StringBuilder operatorRegexBuilder = new StringBuilder();
+        operatorRegexBuilder.append("^[");
+        for (var operator : Operator.values()) {
+            operatorRegexBuilder.append(operator.getSign());
+        }
+        operatorRegexBuilder.append("]$");
+        OPERATOR_REGEX = Pattern.compile(operatorRegexBuilder.toString());
+    }
 
     public static PostfixEvaluator getInstance() {
         if (null == instance) {
@@ -28,10 +37,9 @@ public class PostfixEvaluator {
 
     public BigDecimal evaluate(List<String> tokens) {
         Deque<BigDecimal> operandStack = new ArrayDeque<>();
-        Pattern operatorPattern = Pattern.compile(operatorRegex);
 
         for (var token : tokens) {
-            if (operatorPattern.matcher(token).matches()) {
+            if (OPERATOR_REGEX.matcher(token).matches()) {
                 BigDecimal rightOperand = operandStack.remove();
                 BigDecimal leftOperand = operandStack.remove();
                 Operator operator = Operator.valueOfSign(token);
@@ -40,16 +48,14 @@ public class PostfixEvaluator {
                 operandStack.offerFirst(new BigDecimal(token));
             }
         }
-
         if (1 != operandStack.size()) {
             throw new IllegalArgumentException(ILLEGAL_ARGUMENT_MESSAGE);
         }
+
         return operandStack.remove();
     }
 
-    private PostfixEvaluator() {
-        operatorRegex = getOperatorRegex();
-    }
+    private PostfixEvaluator() {}
 
     private BigDecimal performCalculation(BigDecimal leftOperand, BigDecimal rightOperand, Operator operator) {
         BigDecimal value;
@@ -69,15 +75,5 @@ public class PostfixEvaluator {
         };
 
         return value;
-    }
-
-    private String getOperatorRegex() {
-        StringBuilder regexBuilder = new StringBuilder();
-        regexBuilder.append("^[");
-        for (var operator : Operator.values()) {
-            regexBuilder.append(operator.getSign());
-        }
-        regexBuilder.append("]$");
-        return regexBuilder.toString();
     }
 }
