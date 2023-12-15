@@ -1,21 +1,21 @@
 package pl.edu.zut.expression_evaluator;
 
 public enum Operator {
-    LEFT_PARENTHESIS(Integer.MAX_VALUE, "("),
-    RIGHT_PARENTHESIS(Integer.MAX_VALUE, ")"),
-    MULTIPLY(1, "*"),
-    DIVIDE(1, "/"),
-    ADD(0, "+"),
-    SUBTRACT(0, "-");
+    LEFT_PARENTHESIS(Integer.MAX_VALUE, '('),
+    RIGHT_PARENTHESIS(Integer.MAX_VALUE, ')'),
+    MULTIPLY(1, '*'),
+    DIVIDE(1, '/'),
+    ADD(0, '+'),
+    SUBTRACT(0, '-');
 
-    private static final String OPERATOR_NOT_SUPPORTED_MSG = "Operator %s is not supported.";
+    private static final String OPERATOR_NOT_SUPPORTED_MSG = "Operator %c is not supported.";
 
     private final int precedence;
-    private final String sign;
+    private final char sign;
 
-    public static Operator valueOfSign(String sign) {
+    public static Operator valueOf(char sign) {
         for (var operator : Operator.values()) {
-            if (operator.getSign().equals(sign)) {
+            if (operator.getSign() == sign) {
                 return operator;
             }
         }
@@ -26,11 +26,11 @@ public enum Operator {
         return precedence;
     }
 
-    public String getSign() {
+    public char getSign() {
         return sign;
     }
 
-    private Operator(int precedence, String sign) {
+    private Operator(int precedence, char sign) {
         this.precedence = precedence;
         this.sign = sign;
     }

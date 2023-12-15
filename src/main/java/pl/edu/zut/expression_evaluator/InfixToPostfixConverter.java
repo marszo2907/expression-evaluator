@@ -1,38 +1,34 @@
 package pl.edu.zut.expression_evaluator;
 
 import static pl.edu.zut.expression_evaluator.Operator.LEFT_PARENTHESIS;
+import static pl.edu.zut.expression_evaluator.Operator.RIGHT_PARENTHESIS;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class InfixToPostfixConverter {
     private static final String ILLEGAL_ARGUMENT_MSG = "Exprssion contains an unsupported symbol or a combination of symbols: %s.";
-    private static final String INVALID_PARENTHESIS_MSG = "Expression contains a mismatched %s parenthesis.";
-    private static final Pattern NUMBER_REGEX = Pattern.compile("^[0-9.+-]$");
-    private static final Pattern OPERATOR_REGEX;
-    private static final Pattern PARENTHESES_REGEX;
+    private static final String INVALID_PARENTHESIS_MSG = "Expression contains a mismatched %c parenthesis.";
+    private static final String NUMBERS = "0123456789.+-";
+    private static final String OPERATORS;
+    private static final String PARENTHESES;
 
     private static InfixToPostfixConverter instance;
 
     static {
-        StringBuilder operatorRegexBuilder = new StringBuilder();
-        StringBuilder parenthesesRegexBuilder = new StringBuilder();
-        operatorRegexBuilder.append("^[");
-        parenthesesRegexBuilder.append("^[");
+        StringBuilder operatorBuilder = new StringBuilder();
+        StringBuilder parenthesesBuilder = new StringBuilder();
         for (var operator : Operator.values()) {
-            if (operator.toString().toUpperCase().contains("PARENTHESIS")) {
-                parenthesesRegexBuilder.append(operator.getSign());
+            if (LEFT_PARENTHESIS.equals(operator) || RIGHT_PARENTHESIS.equals(operator)) {
+                parenthesesBuilder.append(operator.getSign());
             } else {
-                operatorRegexBuilder.append(operator.getSign());
+                operatorBuilder.append(operator.getSign());
             }
         }
-        operatorRegexBuilder.append("]$");
-        parenthesesRegexBuilder.append("]$");
-        OPERATOR_REGEX = Pattern.compile(operatorRegexBuilder.toString());
-        PARENTHESES_REGEX = Pattern.compile(parenthesesRegexBuilder.toString());
+        OPERATORS = operatorBuilder.toString();
+        PARENTHESES = parenthesesBuilder.toString();
     }
 
     public static InfixToPostfixConverter getInstance() {
@@ -47,14 +43,14 @@ public class InfixToPostfixConverter {
         StringBuilder numberBuilder = new StringBuilder();
         Deque<Operator> operatorStack = new ArrayDeque<>();
         List<String> postfixTokens = new ArrayList<>();
-        String previousSymbol = null;
+        char previousSymbol = Character.MIN_VALUE;
 
-        for (var symbol : infixExpression.replaceAll("\\s", "").split("")) {
-            if (PARENTHESES_REGEX.matcher(symbol).find()) {
-                Operator parenthesis = Operator.valueOfSign(symbol);
+        for (var symbol : infixExpression.replaceAll("\\s", "").toCharArray()) {
+            if (-1 != PARENTHESES.indexOf(symbol)) {
+                Operator parenthesis = Operator.valueOf(symbol);
                 if (LEFT_PARENTHESIS.equals(parenthesis)) {
                     if (isInNumber) {
-                        String illegalSequence = previousSymbol + symbol;
+                        String illegalSequence = Character.toString(previousSymbol) + symbol;
                         throw new IllegalArgumentException(String.format(ILLEGAL_ARGUMENT_MSG, illegalSequence));
                     }
                     operatorStack.offerLast(parenthesis);
@@ -64,38 +60,37 @@ public class InfixToPostfixConverter {
                         postfixTokens.add(numberBuilder.toString());
                         numberBuilder.setLength(0);
                     }
-                    Operator operator = operatorStack.pollLast();
-                    while (!LEFT_PARENTHESIS.equals(operator)) {
+                    Operator operator;
+                    while (!LEFT_PARENTHESIS.equals(operator = operatorStack.pollLast())) {
                         if (null == operator) {
                             throw new IllegalArgumentException(String.format(INVALID_PARENTHESIS_MSG, "right"));
                         }
-                        postfixTokens.add(operator.getSign());
-                        operator = operatorStack.pollLast();
+                        postfixTokens.add(Character.toString(operator.getSign()));
                     }
                 }
-            } else if (OPERATOR_REGEX.matcher(symbol).find()
-                && !(null == previousSymbol || LEFT_PARENTHESIS.getSign().equals(previousSymbol) || OPERATOR_REGEX.matcher(previousSymbol).find())) {
+            } else if ((-1 != OPERATORS.indexOf(symbol))
+                        && !(Character.MIN_VALUE == previousSymbol
+                            || LEFT_PARENTHESIS.getSign() == previousSymbol
+                            || -1 != OPERATORS.indexOf(previousSymbol))) {
                 if (isInNumber) {
                     isInNumber = false;
                     postfixTokens.add(numberBuilder.toString());
                     numberBuilder.setLength(0);
                 }
-                Operator operator = Operator.valueOfSign(symbol);
-                if (operatorStack.isEmpty() || operator.getPrecedence() > operatorStack.peekLast().getPrecedence()) {
-                    operatorStack.offerLast(operator);
-                } else {
-                    Operator peekedOperator = operatorStack.peekLast();
-                    while (null != peekedOperator && !LEFT_PARENTHESIS.equals(peekedOperator) && operator.getPrecedence() <= peekedOperator.getPrecedence()) {
-                        postfixTokens.add(operatorStack.pollLast().getSign());
-                        peekedOperator = operatorStack.peekLast();
-                    }
-                    operatorStack.offerLast(operator);
+                Operator operator = Operator.valueOf(symbol);
+                Operator peekedOperator = operatorStack.peekLast();
+                while (null != peekedOperator
+                    && !LEFT_PARENTHESIS.equals(peekedOperator)
+                    && operator.getPrecedence() <= peekedOperator.getPrecedence()) {
+                    postfixTokens.add(Character.toString(operatorStack.pollLast().getSign()));
+                    peekedOperator = operatorStack.peekLast();
                 }
-            } else if (NUMBER_REGEX.matcher(symbol).find()) {
+                operatorStack.offerLast(operator);
+            } else if (-1 != NUMBERS.indexOf(symbol)) {
                 isInNumber = true;
                 numberBuilder.append(symbol);
             } else {
-                String illegalSequence = (null == previousSymbol ? "" : previousSymbol) + symbol;
+                String illegalSequence = (Character.MIN_VALUE == previousSymbol ? "" : Character.toString(previousSymbol)) + symbol;
                 throw new IllegalArgumentException(String.format(ILLEGAL_ARGUMENT_MSG, illegalSequence));
             }
             previousSymbol = symbol;
@@ -103,13 +98,12 @@ public class InfixToPostfixConverter {
         if (isInNumber) {
             postfixTokens.add(numberBuilder.toString());
         }
-
         while (!operatorStack.isEmpty()) {
             Operator operator = operatorStack.pollLast();
             if (LEFT_PARENTHESIS.equals(operator)) {
                 throw new IllegalArgumentException(String.format(INVALID_PARENTHESIS_MSG, "left"));
             }
-            postfixTokens.add(operator.getSign());
+            postfixTokens.add(Character.toString(operator.getSign()));
         }
 
         return postfixTokens;

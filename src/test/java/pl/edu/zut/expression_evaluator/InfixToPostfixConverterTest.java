@@ -15,56 +15,8 @@ public class InfixToPostfixConverterTest {
     private static InfixToPostfixConverter infixToPostfixConverter;
 
     @BeforeAll
-    static void init() {
+    private static void init() {
         infixToPostfixConverter = InfixToPostfixConverter.getInstance();
-    }
-
-    @ParameterizedTest
-    @MethodSource("validExpressionsProvider")
-    void testValid(String infixExpression, List<String> expectedResult) {
-        List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
-        assertIterableEquals(expectedResult, postfixTokens);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "0 + 2.5 * 10 - 13.1O1",
-        "0+2.5*10-13O1",
-        "0 + 2.5*10 -13.1O1",
-        "-2 * 3.2A / -1.234",
-        "-2*3.2A5/-1.234",
-        "-2 *3.2A5/- 1.234",
-        "-2 * / 3.25 / -1.234",
-        "-2*/3.25/-1.234",
-        "-2* /3.25/- 1.234",
-        "-a * 2",
-        "-a*2",
-        "- a*2"
-    })
-    void testInvalidSymbols(String infixExpression) {
-        assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
-    }
-
-    @ParameterizedTest
-    @MethodSource("validExpressionsWithParenthesesProvider")
-    void testValidWithParentheses(String infixExpression, List<String> expectedResult) {
-        List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
-        assertIterableEquals(expectedResult, postfixTokens);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "0 + 2.5 * (10 - 13.101))",
-        "0 + 2.5 * )(10 - 13.101)",
-        "0 + 2.5 * ((10 - 13.101)",
-        "0 + 2.5 * (10 - 13.101)(",
-        "(-2 * 3.25) / -1.234)",
-        "(-2 * 3.25)) / -1.234",
-        ")(-2 * 3.25) / -1.234",
-        "0 + 2.5 (10 - 13.101)",
-    })
-    void testInvalidParentheses(String infixExpression) {
-        assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
     }
 
     private static Stream<Arguments> validExpressionsProvider() {
@@ -139,5 +91,53 @@ public class InfixToPostfixConverterTest {
                 List.of("0", "2.5", "+", "3", "10", "13.101", "-" , "/", "*")
             )
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0 + 2.5 * (10 - 13.101))",
+        "0 + 2.5 * )(10 - 13.101)",
+        "0 + 2.5 * ((10 - 13.101)",
+        "0 + 2.5 * (10 - 13.101)(",
+        "(-2 * 3.25) / -1.234)",
+        "(-2 * 3.25)) / -1.234",
+        ")(-2 * 3.25) / -1.234",
+        "0 + 2.5 (10 - 13.101)",
+    })
+    void testInvalidParentheses(String infixExpression) {
+        assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0 + 2.5 * 10 - 13.1O1",
+        "0+2.5*10-13O1",
+        "0 + 2.5*10 -13.1O1",
+        "-2 * 3.2A / -1.234",
+        "-2*3.2A5/-1.234",
+        "-2 *3.2A5/- 1.234",
+        "-2 * / 3.25 / -1.234",
+        "-2*/3.25/-1.234",
+        "-2* /3.25/- 1.234",
+        "-a * 2",
+        "-a*2",
+        "- a*2"
+    })
+    void testInvalidSymbols(String infixExpression) {
+        assertThrows(IllegalArgumentException.class, () -> infixToPostfixConverter.getPostfixTokens(infixExpression));
+    }
+
+    @ParameterizedTest
+    @MethodSource("validExpressionsProvider")
+    void testValid(String infixExpression, List<String> expectedResult) {
+        List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
+        assertIterableEquals(expectedResult, postfixTokens);
+    }
+
+    @ParameterizedTest
+    @MethodSource("validExpressionsWithParenthesesProvider")
+    void testValidWithParentheses(String infixExpression, List<String> expectedResult) {
+        List<String> postfixTokens = infixToPostfixConverter.getPostfixTokens(infixExpression);
+        assertIterableEquals(expectedResult, postfixTokens);
     }
 }

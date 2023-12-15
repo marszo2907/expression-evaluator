@@ -1,8 +1,6 @@
 package pl.edu.zut.expression_evaluator.postfix_notation_evaluator;
 
-import static java.math.RoundingMode.HALF_UP;
 import static java.math.MathContext.DECIMAL128;
-import static java.math.MathContext.DECIMAL32;
 import static pl.edu.zut.expression_evaluator.Operator.*;
 
 import pl.edu.zut.expression_evaluator.Operator;
@@ -44,7 +42,7 @@ public class PostfixEvaluator {
             if (OPERATOR_REGEX.matcher(token).matches()) {
                 BigDecimal rightOperand = operandStack.remove();
                 BigDecimal leftOperand = operandStack.remove();
-                Operator operator = Operator.valueOfSign(token);
+                Operator operator = Operator.valueOf(token.charAt(0));
                 operandStack.offerFirst(performCalculation(leftOperand, rightOperand, operator));
             } else {
                 operandStack.offerFirst(new BigDecimal(token));
@@ -54,7 +52,7 @@ public class PostfixEvaluator {
             throw new IllegalArgumentException(ILLEGAL_ARGUMENT_MESSAGE);
         }
 
-        return operandStack.remove().round(DECIMAL32);
+        return operandStack.remove().round(DECIMAL128).stripTrailingZeros();
     }
 
     private PostfixEvaluator() {}
