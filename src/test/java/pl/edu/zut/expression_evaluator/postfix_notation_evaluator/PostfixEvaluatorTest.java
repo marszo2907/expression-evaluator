@@ -14,29 +14,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 public class PostfixEvaluatorTest {
     private static PostfixEvaluator postfixEvaluator;
 
+    private static Stream<List<String>> divisionByZeroTokensProvider() {
+        return Stream.of(
+            List.of("0", "0", "/"),
+            List.of("1", "0", "/"),
+            List.of("1", "1", "1", "-", "/"),
+            List.of("1", "1", "0", "*", "/")
+        );
+    }
+
     @BeforeAll
-    static void init() {
+    private static void init() {
         postfixEvaluator = PostfixEvaluator.getInstance();
     }
 
-    @ParameterizedTest
-    @MethodSource("validTokensProvider")
-    public void testValid(List<String> tokens, String expectedResultStr) {
-        BigDecimal expectedResult = new BigDecimal(expectedResultStr);
-        BigDecimal result = postfixEvaluator.evaluate(tokens);
-        assertEquals(expectedResult, result);
-    }
-
-    @ParameterizedTest
-    @MethodSource("divisionByZeroTokensProvider")
-    public void testDivisionByZero(List<String> tokens) {
-        assertThrows(ArithmeticException.class, () -> postfixEvaluator.evaluate(tokens));
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidTokensProvider")
-    public void testInvalid(List<String> tokens) {
-        assertThrows(IllegalArgumentException.class, () -> postfixEvaluator.evaluate(tokens));
+    private static Stream<List<String>> invalidTokensProvider() {
+        return Stream.of(
+            List.of("1", "2", "*", "3"),
+            List.of("1", "2", "/", "3"),
+            List.of("1", "2", "+", "3"),
+            List.of("1", "2", "-", "3")
+        );
     }
 
     private static Stream<Arguments> validTokensProvider() {
@@ -79,30 +77,32 @@ public class PostfixEvaluatorTest {
             ),
             Arguments.of(
                 List.of("1", "3", "/"),
-                "0.3333333"
+                "0.3333333333333333333333333333333333"
             ),
             Arguments.of(
                 List.of("2", "1", "3", "/", "*"),
-                "0.6666667"
+                "0.6666666666666666666666666666666666"
             )
         );
     }
 
-    private static Stream<List<String>> divisionByZeroTokensProvider() {
-        return Stream.of(
-            List.of("0", "0", "/"),
-            List.of("1", "0", "/"),
-            List.of("1", "1", "1", "-", "/"),
-            List.of("1", "1", "0", "*", "/")
-        );
+    @ParameterizedTest
+    @MethodSource("divisionByZeroTokensProvider")
+    public void testDivisionByZero(List<String> tokens) {
+        assertThrows(ArithmeticException.class, () -> postfixEvaluator.evaluate(tokens));
     }
 
-    private static Stream<List<String>> invalidTokensProvider() {
-        return Stream.of(
-            List.of("1", "2", "*", "3"),
-            List.of("1", "2", "/", "3"),
-            List.of("1", "2", "+", "3"),
-            List.of("1", "2", "-", "3")
-        );
+    @ParameterizedTest
+    @MethodSource("invalidTokensProvider")
+    public void testInvalid(List<String> tokens) {
+        assertThrows(IllegalArgumentException.class, () -> postfixEvaluator.evaluate(tokens));
+    }
+
+    @ParameterizedTest
+    @MethodSource("validTokensProvider")
+    public void testValid(List<String> tokens, String expectedResultStr) {
+        BigDecimal expectedResult = new BigDecimal(expectedResultStr);
+        BigDecimal result = postfixEvaluator.evaluate(tokens);
+        assertEquals(expectedResult, result);
     }
 }

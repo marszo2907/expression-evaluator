@@ -32,10 +32,8 @@ public class ExpressionEvaluatorTestRun {
         System.out.printf("""
             Welcome to the expression evaluator test run!"
             Supported operations: %s
-            Note: the evaluator ignores whitespace characters 
-                  (e.g. '1 + 2 3' is going to be evaluated as '1+23')
+            Note: the evaluator ignores whitespace characters (e.g. '1 + 2 3' is going to be evaluated as '1+23')
             """, SUPPORTED_OPERATIONS);
-        
         System.out.printf("Enter an expression (or %s to quit): ", QUIT);
         input = scanner.nextLine();
         while (!QUIT.equalsIgnoreCase(input)) {
@@ -47,6 +45,7 @@ public class ExpressionEvaluatorTestRun {
             System.out.printf("Enter an expression (or %s to quit): ", QUIT);
             input = scanner.nextLine();
         }
+        
         System.out.println("Goodbye!");
     }
 }
