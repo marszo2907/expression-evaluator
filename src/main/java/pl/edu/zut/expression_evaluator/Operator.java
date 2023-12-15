@@ -3,10 +3,10 @@ package pl.edu.zut.expression_evaluator;
 public enum Operator {
     LEFT_PARENTHESIS(Integer.MAX_VALUE, '('),
     RIGHT_PARENTHESIS(Integer.MAX_VALUE, ')'),
-    MULTIPLY(1, '*'),
-    DIVIDE(1, '/'),
-    ADD(0, '+'),
-    SUBTRACT(0, '-');
+    MULTIPLICATION(1, '*'),
+    DIVISION(1, '/'),
+    ADDITION(0, '+'),
+    SUBTRACTION(0, '-');
 
     private static final String OPERATOR_NOT_SUPPORTED_MSG = "Operator %c is not supported.";
 

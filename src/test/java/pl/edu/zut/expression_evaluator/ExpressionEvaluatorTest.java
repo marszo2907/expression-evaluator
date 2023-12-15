@@ -13,7 +13,7 @@ public class ExpressionEvaluatorTest {
     private static ExpressionEvaluator expressionEvaluator;
 
     @BeforeAll
-    static void init() {
+    private static void init() {
         expressionEvaluator = ExpressionEvaluator.getInstance();
     }
 

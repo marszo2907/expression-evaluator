@@ -59,10 +59,10 @@ public class PostfixEvaluator {
 
     private BigDecimal performCalculation(BigDecimal leftOperand, BigDecimal rightOperand, Operator operator) {
         return switch (operator) {
-            case MULTIPLY -> leftOperand.multiply(rightOperand, DECIMAL128);
-            case DIVIDE -> leftOperand.divide(rightOperand, DECIMAL128);
-            case ADD -> leftOperand.add(rightOperand, DECIMAL128);
-            case SUBTRACT -> leftOperand.subtract(rightOperand, DECIMAL128);
+            case MULTIPLICATION -> leftOperand.multiply(rightOperand, DECIMAL128);
+            case DIVISION -> leftOperand.divide(rightOperand, DECIMAL128);
+            case ADDITION -> leftOperand.add(rightOperand, DECIMAL128);
+            case SUBTRACTION -> leftOperand.subtract(rightOperand, DECIMAL128);
             default -> throw new UnsupportedOperationException(String.format(UNSUPPORTED_OPERATION_MESSAGE, operator.getSign()));
         };
     }
